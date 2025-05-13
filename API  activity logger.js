@@ -46,5 +46,5 @@
     return originalXhrSend.apply(this, arguments);
   };
 
-  console.log('API Logger is now active. All requests will be logged in the console.');
+  console.log('**#API Logger is now active. All requests will be logged in the console.**');
 })();
