@@ -20,6 +20,7 @@
 
     let apiKeys = [];
     if (options.headers) {
+
       const headers = options.headers;
       if (headers['Authorization']) {
         apiKeys.push({ key: 'Authorization', value: headers['Authorization'] });
@@ -53,7 +54,6 @@
     const response = await originalFetch(...args);
 
     const responseClone = response.clone();
-    const responseBody = await responseClone.json().catch(() => responseClone.text());
 
     console.log("API Response:");
     console.log("Status:", response.status);
@@ -108,28 +108,25 @@
     return originalXhrSend.apply(this, arguments);
   };
 
-  console.log('API Key, Payload, and Response Logging is now active. All relevant data will be logged in the console.');
 })();
 
-
 (function() {
-  console.log = function() {};
-  console.warn = function() {};
   console.error = function() {};
   console.info = function() {};
   console.debug = function() {};
   console.trace = function() {};
-
   console.group = function() {};
   console.groupCollapsed = function() {};
   console.groupEnd = function() {};
 
   window.onerror = function() {
-    return true; // prevents the default behavior of logging errors to the console
+    return true; 
   };
 
   window.onunhandledrejection = function() {
-    return true; // prevent promise rejection errors from appearing
+    return true; 
   };
 
+  console.log('API Key, Payload, and Response Logging is now active. All relevant data will be logged in the console.');
 })();
+
