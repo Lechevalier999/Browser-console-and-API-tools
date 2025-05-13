@@ -112,3 +112,24 @@
 })();
 
 
+(function() {
+  console.log = function() {};
+  console.warn = function() {};
+  console.error = function() {};
+  console.info = function() {};
+  console.debug = function() {};
+  console.trace = function() {};
+
+  console.group = function() {};
+  console.groupCollapsed = function() {};
+  console.groupEnd = function() {};
+
+  window.onerror = function() {
+    return true; // prevents the default behavior of logging errors to the console
+  };
+
+  window.onunhandledrejection = function() {
+    return true; // prevent promise rejection errors from appearing
+  };
+
+})();
