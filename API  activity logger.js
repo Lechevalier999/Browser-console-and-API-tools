@@ -40,7 +40,7 @@
       try {
         payload = JSON.parse(requestBody);
       } catch (e) {
-        payload = requestBody; // If not JSON, just log as is
+        payload = requestBody; 
       }
     }
 
