@@ -1,13 +1,25 @@
 (function() {
+  let logData = [];
+
+  function addToLog(url, apiKeys, payload, response) {
+    const timestamp = new Date().toISOString();
+    logData.push({
+      timestamp,
+      url,
+      apiKeys,
+      payload,
+      response
+    });
+  }
+
   const originalFetch = window.fetch;
   window.fetch = async function(...args) {
     const url = args[0];
-    const options = args[1];
-    const requestBody = options && options.body ? options.body : null;
+    const options = args[1] || {};
+    const requestBody = options.body ? options.body : null;
 
     let apiKeys = [];
-    if (options && options.headers) {
-      // Check for API key in headers (common: 'Authorization', 'x-api-key')
+    if (options.headers) {
       const headers = options.headers;
       if (headers['Authorization']) {
         apiKeys.push({ key: 'Authorization', value: headers['Authorization'] });
@@ -22,17 +34,34 @@
       apiKeys.push({ key: 'api_key', value: urlParams.get('api_key') });
     }
 
-    if (apiKeys.length > 0) {
+    let payload = null;
+    if (requestBody) {
+      try {
+        payload = JSON.parse(requestBody);
+      } catch (e) {
+        payload = requestBody; // If not JSON, just log as is
+      }
+    }
+
+    if (apiKeys.length > 0 || payload) {
       console.log("API Request Detected:");
       console.log("URL:", url);
-      apiKeys.forEach(key => {
-        console.log(`${key.key}:`, key.value);
-      });
+      apiKeys.forEach(key => console.log(`${key.key}:`, key.value));
+      if (payload) console.log("Payload:", payload);
     }
 
     const response = await originalFetch(...args);
 
-    return response;
+    const responseClone = response.clone();
+    const responseBody = await responseClone.json().catch(() => responseClone.text());
+
+    console.log("API Response:");
+    console.log("Status:", response.status);
+    console.log("Response Body:", responseBody);
+
+    addToLog(url, apiKeys, payload, responseBody);
+
+    return response; 
   };
 
   const originalXhrOpen = XMLHttpRequest.prototype.open;
@@ -54,23 +83,32 @@
 
     const headers = this.getAllResponseHeaders();
     if (headers.includes('Authorization')) {
-      apiKeys.push({ key: 'Authorization', value: headers['Authorization'] });
+      apiKeys.push({ key: 'Authorization', value: this.getResponseHeader('Authorization') });
     }
     if (headers.includes('x-api-key')) {
-      apiKeys.push({ key: 'x-api-key', value: headers['x-api-key'] });
+      apiKeys.push({ key: 'x-api-key', value: this.getResponseHeader('x-api-key') });
     }
 
-    if (apiKeys.length > 0) {
+    let payload = body ? JSON.parse(body) : null;
+
+    if (apiKeys.length > 0 || payload) {
       console.log("XHR Request Detected:");
       console.log("URL:", this._url);
-      apiKeys.forEach(key => {
-        console.log(`${key.key}:`, key.value);
-      });
+      apiKeys.forEach(key => console.log(`${key.key}:`, key.value));
+      if (payload) console.log("Payload:", payload);
     }
+
+    this.addEventListener('load', function() {
+      const response = this.responseText;
+      console.log("XHR Response:");
+      console.log("Status:", this.status);
+      console.log("Response Body:", response);
+    });
 
     return originalXhrSend.apply(this, arguments);
   };
 
-  console.log('API Key Logging is now active. All API keys will be logged in the console.');
+  console.log('API Key, Payload, and Response Logging is now active. All relevant data will be logged in the console.');
 })();
+
 
