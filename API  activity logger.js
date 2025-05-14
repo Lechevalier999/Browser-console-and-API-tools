@@ -126,7 +126,7 @@
   window.onunhandledrejection = function() {
     return true; 
   };
+console.log('%c API Key, Payload, and Response Logging is now active. All relevant data will be logged in the console! ', 'background: #ff70d9; color: #fff');
 
-  console.log('API Key, Payload, and Response Logging is now active. All relevant data will be logged in the console.');
 })();
 
