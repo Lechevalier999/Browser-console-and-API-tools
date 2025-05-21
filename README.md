@@ -9,3 +9,5 @@ Just cause the code is obfuscated does not mean its completely undetectable howe
 3. It carefully logs API and cookie data without changing bearer codes API keys etc so the network can keep working thus giving you more and more info.
 4. Takes the normal window.fetch stores it and replaces it with a custom aysnc function.
 
+**My Account stats rn lol**
+[![trophy](https://github-profile-trophy.vercel.app/?username=Lechevalier999)](https://github.com/ryo-ma/github-profile-trophy)
