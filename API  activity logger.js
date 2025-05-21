@@ -126,6 +126,6 @@
   window.onunhandledrejection = function() {
     return true; 
   };
-console.log('%c API Key, Payload, and Response Logging is now active. All relevant data will be logged in the console! ', 'background: #ff70d9; color: #fff');
+console.log('%c API Key, Payload, and Response Logging is now active. All relevant data will be logged in the console. Made by Ribodian Realm Dev aka Lechevalier999! ', 'background: #ff70d9; color: #fff');
 
 })();
