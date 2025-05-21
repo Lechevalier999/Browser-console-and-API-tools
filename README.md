@@ -11,6 +11,6 @@ Just cause the code is obfuscated does not mean its completely undetectable howe
 4. Takes the normal window.fetch stores it and replaces it with a custom aysnc function.
 
 # Warning
-**I'm not responsable for any criminal behaviour with my script. You using it for something illegal is your choice and your issue only.**
+**I'm not responsable for any criminal behaviour any person('s) do with my script. You using it for something illegal is your choice and your issue only.**
 **It's been obfuscated to make it harder to edit so a person cant reverse engineer it to access peoples accounts etc**
 **It's only purpose is to show what an API and cookies are doing by showing payloads, responses, cookie data and API keys.**
