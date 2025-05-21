@@ -2,12 +2,6 @@
 Able to see all the interactions and data between an API/Cookie and website
 Good for making hacks for browser games.
 
-Example of how logged info appears in the console:
-
-API Request Detected:
-Get: example lol
-Bearer: sbfhajhvbsibf
-
 # How it stays undetected
 Just cause the code is obfuscated does not mean its completely undetectable however these are the measures I put in place to make it mostly undetectable:
 
