@@ -1,6 +1,5 @@
-# API-Cheat-Tool
-Able to see all the interactions and data between an API/Cookie and website
-Good for making hacks for browser games.
+# API-Tool
+Able to see all the interactions and data between an API/Cookie and a website. Good for debugging and or whatever thing you're doing that needs API and cookie info.
 
 # How it stays undetected
 Just cause the code is obfuscated does not mean its completely undetectable however these are the measures I put in place to make it mostly undetectable:
