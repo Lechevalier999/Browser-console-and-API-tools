@@ -3,14 +3,12 @@
   const loadingFrames = ["Scanning.  ", "Scanning.. ", "Scanning..."];
   let frame = 0;
 
-  // Animation loop: only one message at a time (using console.clear)
   const spinner = setInterval(() => {
     console.clear();
     console.log(loadingFrames[frame % loadingFrames.length]);
     frame++;
   }, 400);
 
-  // --- Patterns with severity and explanations ---
   const patterns = [
     {
       type: 'Generic Secret',
