@@ -1,93 +1,127 @@
 (async () => {
   const patterns = [
-    /['"`][A-Za-z0-9_\-]{16,}['"`]/g, 
-    /['"`][A-Za-z0-9_\-]{32,}['"`]/g, 
-    /api[_-]?key['"`]?\s*[:=]\s*['"`][A-Za-z0-9_\-]{8,}['"`]/gi,
-    /secret['"`]?\s*[:=]\s*['"`][A-Za-z0-9_\-]{8,}['"`]/gi,
-    /token['"`]?\s*[:=]\s*['"`][A-Za-z0-9_\-]{8,}['"`]/gi,
-    /password['"`]?\s*[:=]\s*['"`][^'"`]{4,}['"`]/gi,
-    /AKIA[0-9A-Z]{16}/g, 
-    /AIza[0-9A-Za-z\-_]{35}/g, 
-    /ya29\.[0-9A-Za-z\-_]+/g, 
-    /ghp_[0-9A-Za-z]{36}/g, 
+    { type: 'Generic Secret', regex: /['"`][A-Za-z0-9_\-]{16,}['"`]/g },
+    { type: 'API Key', regex: /api[_-]?key['"`]?\s*[:=]\s*['"`][A-Za-z0-9_\-]{8,}['"`]/gi },
+    { type: 'Secret', regex: /secret['"`]?\s*[:=]\s*['"`][A-Za-z0-9_\-]{8,}['"`]/gi },
+    { type: 'Token', regex: /token['"`]?\s*[:=]\s*['"`][A-Za-z0-9_\-]{8,}['"`]/gi },
+    { type: 'Password', regex: /password['"`]?\s*[:=]\s*['"`][^'"`]{4,}['"`]/gi },
+    { type: 'AWS Access Key', regex: /AKIA[0-9A-Z]{16}/g },
+    { type: 'Google API Key', regex: /AIza[0-9A-Za-z\-_]{35}/g },
+    { type: 'Google OAuth', regex: /ya29\.[0-9A-Za-z\-_]+/g },
+    { type: 'GitHub Token', regex: /ghp_[0-9A-Za-z]{36}/g },
+    // Weaknesses
+    { type: 'Insecure Resource (HTTP)', regex: /src=['"]http:\/\/[^'"]+/gi },
+    { type: 'Exposed Credentials in URL', regex: /https?:\/\/[^\s\/]+:[^\s\/]+@/gi }, // e.g., user:pass@
+    { type: 'Inline Event Handler', regex: /on\w+=['"][^'"]+['"]/gi },
   ];
 
-  const scannedUrls = new Set();
-
-  async function scanScript(src, depth = 1, maxDepth = 2) {
-    if (scannedUrls.has(src) || depth > maxDepth) return [];
-    scannedUrls.add(src);
-
+  async function fetchAndScan(url, context) {
     try {
-      const res = await fetch(src);
+      const res = await fetch(url);
       if (!res.ok) return [];
       const text = await res.text();
-      let findings = [];
-      patterns.forEach((pat) => {
-        let match;
-        while ((match = pat.exec(text))) {
-          findings.push({ pattern: pat.toString(), match: match[0], src });
-        }
-      });
-
-      const newScriptUrls = Array.from(
-        text.matchAll(/<script\s+[^>]*src=['"]([^'"]+)['"]/gi)
-      ).map(m => (new URL(m[1], src)).href);
-
-      for (const url of newScriptUrls) {
-        findings = findings.concat(await scanScript(url, depth + 1, maxDepth));
-      }
-
-      return findings;
-    } catch (e) {
+      return scanText(text, url, context);
+    } catch {
       return [];
     }
   }
 
-  function scanInlineScripts() {
+  function scanText(text, location, context) {
     let findings = [];
-    document.querySelectorAll('script:not([src])').forEach(script => {
-      const code = script.textContent;
-      patterns.forEach((pat) => {
-        let match;
-        while ((match = pat.exec(code))) {
-          findings.push({ pattern: pat.toString(), match: match[0], src: 'inline-script' });
-        }
-      });
-    });
-    return findings;
-  }
-
-  function scanHTML() {
-    let findings = [];
-    const html = document.documentElement.outerHTML;
-    patterns.forEach((pat) => {
+    patterns.forEach(({ type, regex }) => {
       let match;
-      while ((match = pat.exec(html))) {
-        findings.push({ pattern: pat.toString(), match: match[0], src: 'HTML' });
+      while ((match = regex.exec(text))) {
+        findings.push({
+          type,
+          match: match[0],
+          location,
+          context,
+        });
       }
     });
     return findings;
   }
 
-  const scriptSrcs = Array.from(document.querySelectorAll('script[src]')).map(s => s.src);
-  let allFindings = [];
+  let sources = [];
 
-  for (const src of scriptSrcs) {
-    allFindings = allFindings.concat(await scanScript(src));
+  sources.push({ type: 'html', content: document.documentElement.outerHTML, location: document.location.href });
+
+  document.querySelectorAll('script:not([src])').forEach((el, i) => {
+    sources.push({
+      type: 'inline-script',
+      content: el.textContent,
+      location: `${document.location.href} (inline script #${i + 1})`
+    });
+  });
+
+  document.querySelectorAll('*').forEach((el) => {
+    Array.from(el.attributes).forEach(attr => {
+      if (attr.name.startsWith('on')) {
+        sources.push({
+          type: 'inline-event',
+          content: attr.value,
+          location: `${document.location.href} (<${el.tagName.toLowerCase()} ${attr.name}="...">)`
+        });
+      }
+    });
+  });
+
+  const externalSelectors = [
+    { tag: 'script', attr: 'src' },
+    { tag: 'link[rel="stylesheet"]', attr: 'href' },
+    { tag: 'iframe', attr: 'src' },
+    { tag: 'img', attr: 'src' }
+  ];
+  let externalUrls = [];
+  externalSelectors.forEach(({ tag, attr }) => {
+    document.querySelectorAll(tag).forEach(el => {
+      const url = el.getAttribute(attr);
+      if (url && url.startsWith('https://')) {
+        externalUrls.push({ url, context: `<${el.tagName.toLowerCase()} ${attr}="${url}">` });
+      }
+      if (url && url.startsWith('http://')) {
+        sources.push({
+          type: 'insecure-resource',
+          content: url,
+          location: document.location.href,
+        });
+      }
+    });
+  });
+
+  function getVisibleText() {
+    let walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: (node) => {
+        if (!node.parentElement || !node.textContent.trim()) return NodeFilter.FILTER_REJECT;
+        const style = window.getComputedStyle(node.parentElement);
+        return style && style.display !== 'none' && style.visibility !== 'hidden'
+          ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+    let text = "", node;
+    while (node = walker.nextNode()) text += node.textContent + "\n";
+    return text;
+  }
+  sources.push({ type: 'visible-text', content: getVisibleText(), location: document.location.href });
+
+  let findings = [];
+  sources.forEach(src => {
+    findings.push(...scanText(src.content, src.location, src.type));
+  });
+
+  for (const ext of externalUrls) {
+    findings.push(...await fetchAndScan(ext.url, ext.context));
   }
 
-  allFindings = allFindings.concat(scanInlineScripts());
-
-  allFindings = allFindings.concat(scanHTML());
-
-  if (allFindings.length === 0) {
-    console.log("No possible secrets found.");
-  } else {
-    console.log(`\nPossible secrets found:`);
-    allFindings.forEach(f =>
-      console.log(`[${f.pattern}] --> ${f.match} (in ${f.src})`)
-    );
+  if (findings.length === 0) {
+    console.log("✅ No secrets or security weaknesses found.");
+    return;
   }
-  console.log("Wide scan complete.");
+
+  console.log(`🕵️ Security Findings (${findings.length}):`);
+  findings.forEach(f =>
+    console.log(
+      `🔸 [${f.type}]\n    Match: ${f.match}\n    Location: ${f.location}\n    Context: ${f.context || ""}\n`
+    )
+  );
 })();
