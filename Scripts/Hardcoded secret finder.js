@@ -12,7 +12,6 @@
     /ghp_[0-9A-Za-z]{36}/g, 
   ];
 
-  // Set to avoid duplicate scans
   const scannedUrls = new Set();
 
   async function scanScript(src, depth = 1, maxDepth = 2) {
@@ -31,7 +30,6 @@
         }
       });
 
-      // Recursively scan any new script src found within this script (basic heuristic)
       const newScriptUrls = Array.from(
         text.matchAll(/<script\s+[^>]*src=['"]([^'"]+)['"]/gi)
       ).map(m => (new URL(m[1], src)).href);
@@ -46,7 +44,6 @@
     }
   }
 
-  // Scan inline scripts
   function scanInlineScripts() {
     let findings = [];
     document.querySelectorAll('script:not([src])').forEach(script => {
@@ -61,7 +58,6 @@
     return findings;
   }
 
-  // Scan the HTML body
   function scanHTML() {
     let findings = [];
     const html = document.documentElement.outerHTML;
@@ -74,19 +70,15 @@
     return findings;
   }
 
-  // Start scanning
   const scriptSrcs = Array.from(document.querySelectorAll('script[src]')).map(s => s.src);
   let allFindings = [];
 
-  // External scripts (with recursive search)
   for (const src of scriptSrcs) {
     allFindings = allFindings.concat(await scanScript(src));
   }
 
-  // Inline scripts
   allFindings = allFindings.concat(scanInlineScripts());
 
-  // HTML
   allFindings = allFindings.concat(scanHTML());
 
   if (allFindings.length === 0) {
