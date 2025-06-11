@@ -112,15 +112,19 @@
     findings.push(...await fetchAndScan(ext.url, ext.context));
   }
 
+  // --- Updated logging section (collapsible findings) ---
   if (findings.length === 0) {
     console.log("✅ No secrets or security weaknesses found.");
     return;
   }
 
-  console.log(`🕵️ Security Findings (${findings.length}):`);
+  console.groupCollapsed(`🕵️ Security Findings (${findings.length}) — click to expand`);
   findings.forEach(f =>
     console.log(
       `🔸 [${f.type}]\n    Match: ${f.match}\n    Location: ${f.location}\n    Context: ${f.context || ""}\n`
     )
   );
+  console.groupEnd();
+  // ------------------------------------------------------
+
 })();
