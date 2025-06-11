@@ -1,17 +1,89 @@
 (async () => {
+  let animating = true;
+  const loadingFrames = ["Scanning.  ", "Scanning.. ", "Scanning..."];
+  let frame = 0;
+
+  // Animation loop: only one message at a time (using console.clear)
+  const spinner = setInterval(() => {
+    console.clear();
+    console.log(loadingFrames[frame % loadingFrames.length]);
+    frame++;
+  }, 400);
+
+  // --- Patterns with severity and explanations ---
   const patterns = [
-    { type: 'Generic Secret', regex: /['"`][A-Za-z0-9_\-]{16,}['"`]/g },
-    { type: 'API Key', regex: /api[_-]?key['"`]?\s*[:=]\s*['"`][A-Za-z0-9_\-]{8,}['"`]/gi },
-    { type: 'Secret', regex: /secret['"`]?\s*[:=]\s*['"`][A-Za-z0-9_\-]{8,}['"`]/gi },
-    { type: 'Token', regex: /token['"`]?\s*[:=]\s*['"`][A-Za-z0-9_\-]{8,}['"`]/gi },
-    { type: 'Password', regex: /password['"`]?\s*[:=]\s*['"`][^'"`]{4,}['"`]/gi },
-    { type: 'AWS Access Key', regex: /AKIA[0-9A-Z]{16}/g },
-    { type: 'Google API Key', regex: /AIza[0-9A-Za-z\-_]{35}/g },
-    { type: 'Google OAuth', regex: /ya29\.[0-9A-Za-z\-_]+/g },
-    { type: 'GitHub Token', regex: /ghp_[0-9A-Za-z]{36}/g },
-    { type: 'Insecure Resource (HTTP)', regex: /src=['"]http:\/\/[^'"]+/gi },
-    { type: 'Exposed Credentials in URL', regex: /https?:\/\/[^\s\/]+:[^\s\/]+@/gi }, // e.g., user:pass@
-    { type: 'Inline Event Handler', regex: /on\w+=['"][^'"]+['"]/gi },
+    {
+      type: 'Generic Secret',
+      regex: /['"`][A-Za-z0-9_\-]{16,}['"`]/g,
+      severity: 'medium',
+      explanation: 'Hardcoded secrets can be harvested by attackers for unauthorized access to APIs, services, or infrastructure.'
+    },
+    {
+      type: 'API Key',
+      regex: /api[_-]?key['"`]?\s*[:=]\s*['"`][A-Za-z0-9_\-]{8,}['"`]/gi,
+      severity: 'extreme',
+      explanation: 'API Keys found in client code can be abused by attackers to access backend systems, potentially incurring costs or data breaches.'
+    },
+    {
+      type: 'Secret',
+      regex: /secret['"`]?\s*[:=]\s*['"`][A-Za-z0-9_\-]{8,}['"`]/gi,
+      severity: 'extreme',
+      explanation: 'Exposed secrets often grant direct access to sensitive resources or systems, leading to account or data compromise.'
+    },
+    {
+      type: 'Token',
+      regex: /token['"`]?\s*[:=]\s*['"`][A-Za-z0-9_\-]{8,}['"`]/gi,
+      severity: 'extreme',
+      explanation: 'Tokens can be used to impersonate users or services, resulting in privilege escalation or data exfiltration.'
+    },
+    {
+      type: 'Password',
+      regex: /password['"`]?\s*[:=]\s*['"`][^'"`]{4,}['"`]/gi,
+      severity: 'extreme',
+      explanation: 'Plaintext passwords may allow attackers to directly log in to services or escalate privileges.'
+    },
+    {
+      type: 'AWS Access Key',
+      regex: /AKIA[0-9A-Z]{16}/g,
+      severity: 'extreme',
+      explanation: 'AWS Access Keys can allow attackers to fully control cloud resources and access sensitive data.'
+    },
+    {
+      type: 'Google API Key',
+      regex: /AIza[0-9A-Za-z\-_]{35}/g,
+      severity: 'extreme',
+      explanation: 'Google API Keys can be abused for quota exhaustion or access to Google Cloud resources.'
+    },
+    {
+      type: 'Google OAuth',
+      regex: /ya29\.[0-9A-Za-z\-_]+/g,
+      severity: 'extreme',
+      explanation: 'OAuth tokens can be used to access or impersonate user accounts and sensitive data.'
+    },
+    {
+      type: 'GitHub Token',
+      regex: /ghp_[0-9A-Za-z]{36}/g,
+      severity: 'extreme',
+      explanation: 'GitHub tokens can allow attackers to push malicious code or steal sensitive repository data.'
+    },
+    {
+      type: 'Insecure Resource (HTTP)',
+      regex: /src=['"]http:\/\/[^'"]+/gi,
+      severity: 'medium',
+      explanation: 'HTTP resources can be intercepted or modified in transit (man-in-the-middle attacks).'
+    },
+    {
+      type: 'Exposed Credentials in URL',
+      regex: /https?:\/\/[^\s\/]+:[^\s\/]+@/gi,
+      severity: 'extreme',
+      explanation: 'Credentials in URLs can be easily harvested from browser history or server logs.'
+    },
+    {
+      type: 'Inline Event Handler',
+      regex: /on\w+=['"][^'"]+['"]/gi,
+      severity: 'medium',
+      explanation: 'Inline event handlers can introduce XSS vulnerabilities if user data is injected.'
+    },
   ];
 
   async function fetchAndScan(url, context) {
@@ -27,7 +99,7 @@
 
   function scanText(text, location, context) {
     let findings = [];
-    patterns.forEach(({ type, regex }) => {
+    patterns.forEach(({ type, regex, severity, explanation }) => {
       let match;
       while ((match = regex.exec(text))) {
         findings.push({
@@ -35,6 +107,8 @@
           match: match[0],
           location,
           context,
+          severity,
+          explanation,
         });
       }
     });
@@ -104,15 +178,23 @@
   sources.push({ type: 'visible-text', content: getVisibleText(), location: document.location.href });
 
   let findings = [];
-  sources.forEach(src => {
+  for (const src of sources) {
     findings.push(...scanText(src.content, src.location, src.type));
-  });
+  }
 
   for (const ext of externalUrls) {
     findings.push(...await fetchAndScan(ext.url, ext.context));
   }
 
-  // --- Updated logging section (collapsible findings) ---
+  const hazards = findings.filter(f =>
+    f.severity === 'extreme' || f.severity === 'medium'
+  );
+
+  clearInterval(spinner);
+  console.clear();
+  console.log('Scanned.');
+
+  // --- Logging section ---
   if (findings.length === 0) {
     console.log("✅ No secrets or security weaknesses found.");
     return;
@@ -125,6 +207,14 @@
     )
   );
   console.groupEnd();
-  // ------------------------------------------------------
 
+  if (hazards.length > 0) {
+    console.groupCollapsed(`⚠️ Potentially Exploitable Hazards (${hazards.length}) — click to expand`);
+    hazards.forEach(f =>
+      console.log(
+        `🚨 [${f.type.toUpperCase()}] [${f.severity.toUpperCase()}]\n    Match: ${f.match}\n    Location: ${f.location}\n    Context: ${f.context || ""}\n    Exploitation: ${f.explanation}\n`
+      )
+    );
+    console.groupEnd();
+  }
 })();
