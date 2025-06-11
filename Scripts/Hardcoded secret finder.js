@@ -9,7 +9,6 @@
     { type: 'Google API Key', regex: /AIza[0-9A-Za-z\-_]{35}/g },
     { type: 'Google OAuth', regex: /ya29\.[0-9A-Za-z\-_]+/g },
     { type: 'GitHub Token', regex: /ghp_[0-9A-Za-z]{36}/g },
-    // Weaknesses
     { type: 'Insecure Resource (HTTP)', regex: /src=['"]http:\/\/[^'"]+/gi },
     { type: 'Exposed Credentials in URL', regex: /https?:\/\/[^\s\/]+:[^\s\/]+@/gi }, // e.g., user:pass@
     { type: 'Inline Event Handler', regex: /on\w+=['"][^'"]+['"]/gi },
