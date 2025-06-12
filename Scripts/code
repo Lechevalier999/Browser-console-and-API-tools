@@ -1,0 +1,43 @@
+(async () => {
+  const apiUrl = 'https://towerdefense.blooket.com/api/users/add-rewards';
+
+  const payload = {
+    t: '684af6622fb778f572c11e2c',
+    addedTokens: 999999,
+    addedXp: 999999999
+  };
+
+  // Replace these tokens with your current session valid tokens
+  const xNsPaToken = '366ccb6dc95d197ea2aa019f038de6551baa58039ed87246d23011d02ce42222';
+  const xCsrfToken = 'EXyruyw1h9xU4gXsqg7I1ttCu63PFxRSPyztQJjKubkZSClb8zN6YggdEXuqJsJSL7FJpmlVTxX3M5zv0hSOlw==';
+  const xBlooketBuild = 'bid25ee8a52545c54841cc1332e8e7c79068255dd8f7f2bd6e8';
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json, text/plain, */*',
+    'Origin': 'https://towerdefense.blooket.com',
+    'Referer': 'https://towerdefense.blooket.com/results',
+    'x-ns-patoken': xNsPaToken,
+    'x-csrf-token': xCsrfToken,
+    'x-blooket-build': xBlooketBuild
+  };
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'PUT',
+      headers,
+      credentials: 'include', // send cookies
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`API Request failed. Status: ${response.status}. Response: ${text}`);
+    }
+
+    const result = await response.json();
+    console.log('Add Rewards Response:', result);
+  } catch (err) {
+    console.error('Error calling add-rewards API:', err);
+  }
+})();
