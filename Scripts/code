@@ -3,8 +3,8 @@
 
   const payload = {
     t: '684af6622fb778f572c11e2c',
-    addedTokens: 999999,
-    addedXp: 999999999
+    addedTokens: 500,
+    addedXp: 300
   };
 
   // Replace these tokens with your current session valid tokens
@@ -16,7 +16,7 @@
     'Content-Type': 'application/json',
     'Accept': 'application/json, text/plain, */*',
     'Origin': 'https://towerdefense.blooket.com',
-    'Referer': 'https://towerdefense.blooket.com/results',
+    'Referer': 'https://towerdefense.blooket.com/api/users/add-rewards',
     'x-ns-patoken': xNsPaToken,
     'x-csrf-token': xCsrfToken,
     'x-blooket-build': xBlooketBuild
