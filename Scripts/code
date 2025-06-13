@@ -3,8 +3,8 @@
 
   const payload = {
     t: '684af6622fb778f572c11e2c',
-    addedTokens: 500,
-    addedXp: 300
+    addedTokens: 9999,
+    addedXp: 9999
   };
 
   // Replace these tokens with your current session valid tokens
