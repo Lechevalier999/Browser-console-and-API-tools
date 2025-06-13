@@ -5,7 +5,7 @@
   const payload = {
     t: "684c356fc19a71518255e985",
     addedTokens: 500,
-    addedXp: 500
+    addedXp: 300
   };
 
   // Replace these tokens with your current valid session tokens from factory.blooket.com
