@@ -1,21 +1,19 @@
 (async () => {
-  const apiUrl = 'https://factory.blooket.com/api/users/add-rewards';
+  const apiUrl = 'https://play.blooket.com/api/users/add-rewards';
 
-  // Updated payload as you requested
   const payload = {
     t: "684c356fc19a71518255e985",
-    addedTokens: 500,
-    addedXp: 300
+    addedTokens: 1000,
+    addedXp: 1000
   };
 
-  // Replace these tokens with your current valid session tokens from factory.blooket.com
   const xNsPaToken = '366ccb6dc95d197ea2aa019f038de6551baa58039ed87246d23011d02ce42222';
 
   const headers = {
     'Content-Type': 'application/json',
     'Accept': 'application/json, text/plain, */*',
-    'Origin': 'https://factory.blooket.com',
-    'Referer': 'https://factory.blooket.com/play/factory/final',
+    'Origin': 'https://play.blooket.com/api/users/me',
+    'Referer': 'https://play.blooket.com/api/users/rewards',
     'x-ns-patoken': xNsPaToken,
   };
 
@@ -23,7 +21,7 @@
     const response = await fetch(apiUrl, {
       method: 'PUT',
       headers,
-      credentials: 'include', // Send cookies for authentication and CSRF protection
+      credentials: 'include', 
       body: JSON.stringify(payload)
     });
 
