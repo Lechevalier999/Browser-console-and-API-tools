@@ -7,7 +7,14 @@
     addedXp: 1000
   };
 
-  const xNsPaToken = '366ccb6dc95d197ea2aa019f038de6551baa58039ed87246d23011d02ce42222';
+const originalFetch = window.fetch;
+window.fetch = async (...args) => {
+  const response = await originalFetch(...args);
+  if (response.headers.has('X-Ns-Patoken')) {
+    const token = response.headers.get('X-Ns-Patoken');
+  }
+};
+  const xNsPaToken = 'token';
 
   const headers = {
     'Content-Type': 'application/json',
