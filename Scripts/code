@@ -3,8 +3,8 @@
 
   const payload = {
     t: "684c356fc19a71518255e985",
-    addedTokens: 1000,
-    addedXp: 1000
+    addedTokens: 500,
+    addedXp: 300
   };
 
 const originalFetch = window.fetch;
