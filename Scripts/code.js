@@ -14,11 +14,11 @@ window.fetch = async (...args) => {
     const token = response.headers.get('X-Ns-Patoken');
   }
 };
-  const xNsPaToken = 'token';
+  const xNsPaToken = token;
 
   const headers = {
     'Content-Type': 'application/json',
-    'Accept': 'application/json, text/plain, */*',
+    'Accept': '*/*',
     'Origin': 'https://play.blooket.com/api/users/me',
     'Referer': 'https://play.blooket.com/api/users/rewards',
     'x-ns-patoken': xNsPaToken,
