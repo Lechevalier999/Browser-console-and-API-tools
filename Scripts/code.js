@@ -14,7 +14,7 @@ window.fetch = async (...args) => {
     const token = response.headers.get('X-Ns-Patoken');
   }
 };
-  const xNsPaToken = token;
+  const xNsPaToken = 'token';
 
   const headers = {
     'Content-Type': 'application/json',
