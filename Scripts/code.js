@@ -19,8 +19,8 @@ window.fetch = async (...args) => {
   const headers = {
     'Content-Type': 'application/json',
     'Accept': '*/*',
-    'Origin': 'https://play.blooket.com/api/users/me',
-    'Referer': 'https://play.blooket.com/api/users/rewards',
+    'Origin': 'https://play.blooket.com/towerdefense',
+    'Referer': 'https://play.blooket.com/towerdefense/final',
     'x-ns-patoken': xNsPaToken,
   };
 
