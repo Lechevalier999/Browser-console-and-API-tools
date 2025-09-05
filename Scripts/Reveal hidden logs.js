@@ -1,10 +1,8 @@
-(function() {
+(function () {
     const originalConsole = window.console;
-    window.console = {
-        log: originalConsole.log.bind(originalConsole),
-        info: originalConsole.info.bind(originalConsole),
-        warn: originalConsole.warn.bind(originalConsole),
-        error: originalConsole.error.bind(originalConsole),
-        clear: originalConsole.clear.bind(originalConsole),
-    };
+    originalConsole.log = originalConsole.log.bind(originalConsole);
+    originalConsole.info = originalConsole.info.bind(originalConsole);
+    originalConsole.warn = originalConsole.warn.bind(originalConsole);
+    originalConsole.error = originalConsole.error.bind(originalConsole);
+    originalConsole.clear = originalConsole.clear.bind(originalConsole);
 })();
