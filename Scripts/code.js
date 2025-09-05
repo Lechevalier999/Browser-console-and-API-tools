@@ -2,7 +2,7 @@
   const apiUrl = 'https://play.blooket.com/api/users/add-rewards';
 
   const payload = {
-    t: "684c356fc19a71518255e985", // replace with your blooket user id as this is mine
+    t: "684c356fc19a71518255e985", 
     addedTokens: 500,
     addedXp: 300
   };
