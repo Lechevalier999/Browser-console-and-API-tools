@@ -1,3 +1,8 @@
+
+Dont worry about this this was a blooket hack code I made it does not work anymore.
+
+
+
 (async () => {
   const apiUrl = 'https://play.blooket.com/api/users/add-rewards';
 
