@@ -7,7 +7,7 @@
   const apiUrl = 'https://play.blooket.com/api/users/add-rewards';
 
   const payload = {
-    t: "684c356fc19a71518255e985", 
+    t: "63503fb4ac194c93b93eb321", 
     addedTokens: 500,
     addedXp: 300
   };
