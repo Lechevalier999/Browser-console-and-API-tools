@@ -4,6 +4,3 @@ Bunch of tools to see secret things that are hidden deep in the code of a websit
 **pasted in console**
 if it finds a lot of issues it can freeze the browser for up to 20 seconds or even more be patient.
 
-
-**My Account stats rn lol**
-[![trophy](https://github-profile-trophy.vercel.app/?username=Lechevalier999)](https://github.com/ryo-ma/github-profile-trophy)
